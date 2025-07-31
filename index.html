@@ -104,6 +104,17 @@
             cursor: pointer;
             margin-top: 15px;
         }
+        /* Style for the input field */
+        #answerInput {
+            -webkit-appearance: none; /* Remove default styling for iOS */
+            -moz-appearance: textfield; /* Remove default styling for Firefox */
+        }
+        /* Hide arrows for number input */
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
     </style>
 </head>
 <body>
@@ -112,6 +123,13 @@
         <p class="instructions">Click 'Start' to begin. Speak your answer when asked!</p>
         <div id="problem" class="problem-text">Click Start!</div>
         <button id="startButton" class="button-primary mt-4">Start</button>
+
+        <!-- New elements for manual input -->
+        <div id="manualInputContainer" class="mt-4 hidden">
+            <input type="number" id="answerInput" class="w-full p-3 text-center text-2xl rounded-lg border-2 border-gray-300 focus:outline-none focus:border-blue-500" placeholder="Type your answer here">
+            <button id="submitAnswerButton" class="button-primary mt-4">Submit Answer</button>
+        </div>
+
         <div id="feedback" class="feedback-text"></div>
         <div id="score" class="score-text">Score: 0 / 0</div>
     </div>
@@ -136,6 +154,11 @@
         const messageBox = document.getElementById('messageBox');
         const messageText = document.getElementById('messageText');
         const messageBoxClose = document.getElementById('messageBoxClose');
+
+        // New HTML elements for manual input
+        const manualInputContainer = document.getElementById('manualInputContainer');
+        const answerInput = document.getElementById('answerInput');
+        const submitAnswerButton = document.getElementById('submitAnswerButton');
 
         // Game state variables
         let num1, num2, correctAnswer;
@@ -180,9 +203,13 @@
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
             if (!SpeechRecognition) {
-                showMessageBox("Speech Recognition is not supported in this browser. Please use Chrome or Edge.");
+                // If SpeechRecognition is not supported, switch to manual input mode
+                showMessageBox("Voice input is not supported on this device. Please type your answers.");
                 startButton.disabled = true;
-                return;
+                startButton.classList.add('opacity-50', 'cursor-not-allowed'); // Visually disable start button
+                manualInputContainer.classList.remove('hidden'); // Show manual input fields
+                document.querySelector('.instructions').textContent = "Type your answer and click Submit!";
+                return; // Exit, as voice recognition won't work
             }
 
             recognition = new SpeechRecognition();
@@ -218,10 +245,8 @@
 
             recognition.onend = () => {
                 if (isListening) {
-                    // If onend is called but we still expect to be listening, restart.
-                    // This can happen if the browser stops listening prematurely.
-                    // For this app, we stop listening after a result, so this might not be needed.
-                    // However, if no speech is detected, onerror handles restarting.
+                    // This block handles cases where recognition stops unexpectedly while we expect it to be active.
+                    // For this app's flow, onerror typically handles restarts, but this is a general safeguard.
                 }
             };
         }
@@ -247,15 +272,29 @@
             feedbackElement.textContent = ""; // Clear previous feedback
             feedbackElement.classList.remove('correct', 'incorrect');
 
-            speak(`What is ${num1} times ${num2}?`, () => {
-                startListening(); // Start listening after the question is spoken
-            });
+            // If voice recognition is not supported (manual input is visible), clear input and focus
+            if (!manualInputContainer.classList.contains('hidden')) {
+                answerInput.value = ''; // Clear previous typed answer
+                answerInput.focus(); // Keep focus on the input field for quick typing
+                speak(`What is ${num1} times ${num2}?`); // Still speak the question
+            } else {
+                // Otherwise, proceed with speech input
+                speak(`What is ${num1} times ${num2}?`, () => {
+                    startListening(); // Start listening after the question is spoken
+                });
+            }
         }
 
-        function checkAnswer(spokenAnswer) {
-            // Try to parse the spoken answer. Handle cases like "five" or "twenty-five"
-            // A simple approach: convert words to numbers. For more robust, use a library.
-            const parsedAnswer = parseInt(spokenAnswer.replace(/[^0-9]/g, ''), 10); // Remove non-digits and parse
+        function checkAnswer(inputAnswer) {
+            let parsedAnswer;
+            if (typeof inputAnswer === 'string') {
+                // For voice input, try to parse the spoken words to numbers
+                // This is a simple regex; for more robust parsing of "twenty-five" etc., a library would be needed.
+                parsedAnswer = parseInt(inputAnswer.replace(/[^0-9]/g, ''), 10);
+            } else {
+                // For typed input, it's already a number or can be parsed directly
+                parsedAnswer = parseInt(inputAnswer, 10);
+            }
 
             totalQuestions++;
 
@@ -289,21 +328,37 @@
             startButton.textContent = "Speak Answer"; // Change button text
             // Remove this initial listener
             startButton.removeEventListener('click', handleStartButtonClick);
-            // Add the new listener for speaking
+            // Add the new listener for speaking (if voice is supported)
+            // Or keep it for manual input if voice is not supported (it will do nothing if recognition is null)
             startButton.addEventListener('click', startListening);
             generateProblem();
+            // Hide manual input if voice is supported, otherwise it's already visible
+            if (recognition) { // Only hide if recognition was successfully set up
+                manualInputContainer.classList.add('hidden');
+            }
         }
 
         // Attach the initial named click handler
         startButton.addEventListener('click', handleStartButtonClick);
 
-        // Initialize SpeechSynthesis
+        // Add event listener for the new manual submit button
+        submitAnswerButton.addEventListener('click', () => {
+            const typedAnswer = answerInput.value;
+            if (typedAnswer !== '') {
+                checkAnswer(typedAnswer);
+            } else {
+                feedbackElement.textContent = "Please type an answer!";
+                feedbackElement.classList.remove('correct', 'incorrect');
+            }
+        });
+
+        // Initialize SpeechSynthesis and SpeechRecognition on window load
         window.onload = () => {
             synth = window.speechSynthesis;
             if (!synth) {
                 showMessageBox("Speech Synthesis is not supported in this browser.");
             }
-            setupSpeechRecognition();
+            setupSpeechRecognition(); // This will determine if voice or manual input is used
         };
 
     </script>
