@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multiplication Fun!</title>
+    <!-- Tailwind CSS CDN for easy styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for a playful look */
+        body {
+            font-family: 'Inter', sans-serif; /* Using Inter font */
+            background: linear-gradient(135deg, #a8c0ff, #3f2b96); /* Gradient background */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            overflow: hidden; /* Prevent scrollbars */
+        }
+        .container {
+            background-color: rgba(255, 255, 255, 0.95); /* Slightly transparent white */
+            border-radius: 2rem; /* More rounded corners */
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3); /* Stronger shadow */
+            padding: 2.5rem;
+            text-align: center;
+            max-width: 90%;
+            width: 500px;
+            animation: fadeIn 1s ease-out; /* Fade-in animation */
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .problem-text {
+            font-size: 3.5rem; /* Larger font for problem */
+            font-weight: bold;
+            color: #4a00e0; /* Deep purple */
+            margin-bottom: 2rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .feedback-text {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-top: 1.5rem;
+            min-height: 3rem; /* Ensure space for feedback */
+        }
+        .correct {
+            color: #28a745; /* Green for correct */
+        }
+        .incorrect {
+            color: #dc3545; /* Red for incorrect */
+        }
+        .button-primary {
+            background: linear-gradient(45deg, #6a11cb, #2575fc); /* Blue-purple gradient */
+            color: white;
+            padding: 1rem 2.5rem;
+            border-radius: 9999px; /* Pill shape */
+            font-size: 1.5rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+            border: none;
+            outline: none;
+        }
+        .button-primary:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.3);
+        }
+        .button-primary:active {
+            transform: translateY(0);
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+        }
+        .score-text {
+            font-size: 1.2rem;
+            color: #666;
+            margin-top: 1.5rem;
+        }
+        .instructions {
+            font-size: 1rem;
+            color: #555;
+            margin-bottom: 1rem;
+        }
+        .message-box {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            text-align: center;
+            display: none; /* Hidden by default */
+        }
+        .message-box button {
+            background-color: #2575fc;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-4xl font-extrabold text-blue-800 mb-6">Multiplication Fun!</h1>
+        <p class="instructions">Click 'Start' to begin. Speak your answer when asked!</p>
+        <div id="problem" class="problem-text">Click Start!</div>
+        <button id="startButton" class="button-primary mt-4">Start</button>
+        <div id="feedback" class="feedback-text"></div>
+        <div id="score" class="score-text">Score: 0 / 0</div>
+    </div>
+
+    <!-- Custom Message Box -->
+    <div id="messageBox" class="message-box">
+        <p id="messageText"></p>
+        <button id="messageBoxClose">OK</button>
+    </div>
+
+    <script>
+        // Global variables for Firebase configuration and app ID
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        // HTML elements
+        const problemElement = document.getElementById('problem');
+        const startButton = document.getElementById('startButton');
+        const feedbackElement = document.getElementById('feedback');
+        const scoreElement = document.getElementById('score');
+        const messageBox = document.getElementById('messageBox');
+        const messageText = document.getElementById('messageText');
+        const messageBoxClose = document.getElementById('messageBoxClose');
+
+        // Game state variables
+        let num1, num2, correctAnswer;
+        let score = 0;
+        let totalQuestions = 0;
+        let isListening = false;
+        let recognition;
+        let synth;
+
+        // --- Utility Functions for Message Box ---
+        function showMessageBox(message) {
+            messageText.textContent = message;
+            messageBox.style.display = 'block';
+        }
+
+        function hideMessageBox() {
+            messageBox.style.display = 'none';
+        }
+
+        messageBoxClose.addEventListener('click', hideMessageBox);
+
+        // --- Speech Synthesis (Text-to-Speech) ---
+        function speak(text, callback) {
+            if (!synth) {
+                showMessageBox("Speech synthesis not supported in this browser.");
+                return;
+            }
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'en-US'; // Set language
+            utterance.rate = 0.9; // Slightly slower for kids
+            utterance.pitch = 1.0; // Normal pitch
+
+            if (callback) {
+                utterance.onend = callback;
+            }
+            synth.speak(utterance);
+        }
+
+        // --- Speech Recognition (Voice Input) ---
+        function setupSpeechRecognition() {
+            // Check for Web Speech API compatibility
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+            if (!SpeechRecognition) {
+                showMessageBox("Speech Recognition is not supported in this browser. Please use Chrome or Edge.");
+                startButton.disabled = true;
+                return;
+            }
+
+            recognition = new SpeechRecognition();
+            recognition.continuous = false; // Listen for a single utterance
+            recognition.lang = 'en-US';
+            recognition.interimResults = false; // Only return final results
+            recognition.maxAlternatives = 1; // Get the most likely result
+
+            recognition.onresult = (event) => {
+                isListening = false;
+                const spokenAnswer = event.results[0][0].transcript;
+                console.log('Spoken Answer:', spokenAnswer);
+                checkAnswer(spokenAnswer);
+            };
+
+            recognition.onerror = (event) => {
+                isListening = false;
+                console.error('Speech recognition error:', event.error);
+                if (event.error === 'no-speech') {
+                    feedbackElement.textContent = "I didn't hear anything. Try again!";
+                    speak("I didn't hear anything. Try again!", () => {
+                        setTimeout(startListening, 1000); // Try listening again
+                    });
+                } else if (event.error === 'not-allowed') {
+                    showMessageBox("Microphone access denied. Please allow microphone access in your browser settings to use voice input.");
+                } else {
+                    feedbackElement.textContent = `Error: ${event.error}. Please try again.`;
+                    speak(`Error: ${event.error}. Please try again.`, () => {
+                        setTimeout(startListening, 1000); // Try listening again
+                    });
+                }
+            };
+
+            recognition.onend = () => {
+                if (isListening) {
+                    // If onend is called but we still expect to be listening, restart.
+                    // This can happen if the browser stops listening prematurely.
+                    // For this app, we stop listening after a result, so this might not be needed.
+                    // However, if no speech is detected, onerror handles restarting.
+                }
+            };
+        }
+
+        function startListening() {
+            if (recognition && !isListening) {
+                feedbackElement.textContent = "Listening...";
+                feedbackElement.classList.remove('correct', 'incorrect');
+                recognition.start();
+                isListening = true;
+            } else if (!recognition) {
+                showMessageBox("Speech recognition is not available.");
+            }
+        }
+
+        // --- Game Logic ---
+        function generateProblem() {
+            num1 = Math.floor(Math.random() * 10) + 1; // Numbers 1-10
+            num2 = Math.floor(Math.random() * 10) + 1; // Numbers 1-10
+            correctAnswer = num1 * num2;
+
+            problemElement.textContent = `${num1} x ${num2} = ?`;
+            feedbackElement.textContent = ""; // Clear previous feedback
+            feedbackElement.classList.remove('correct', 'incorrect');
+
+            speak(`What is ${num1} times ${num2}?`, () => {
+                startListening(); // Start listening after the question is spoken
+            });
+        }
+
+        function checkAnswer(spokenAnswer) {
+            // Try to parse the spoken answer. Handle cases like "five" or "twenty-five"
+            // A simple approach: convert words to numbers. For more robust, use a library.
+            const parsedAnswer = parseInt(spokenAnswer.replace(/[^0-9]/g, ''), 10); // Remove non-digits and parse
+
+            totalQuestions++;
+
+            if (!isNaN(parsedAnswer) && parsedAnswer === correctAnswer) {
+                score++;
+                feedbackElement.textContent = "Correct! Good job!";
+                feedbackElement.classList.add('correct');
+                speak("Correct! Good job!", () => {
+                    setTimeout(generateProblem, 1500); // Next problem after a short delay
+                });
+            } else {
+                feedbackElement.textContent = `Incorrect. The answer is ${correctAnswer}.`;
+                feedbackElement.classList.add('incorrect');
+                speak(`Incorrect. The answer is ${correctAnswer}.`, () => {
+                    setTimeout(generateProblem, 2500); // Next problem after a slightly longer delay
+                });
+            }
+            updateScore();
+        }
+
+        function updateScore() {
+            scoreElement.textContent = `Score: ${score} / ${totalQuestions}`;
+        }
+
+        // --- Event Listeners and Initialization ---
+        // Define the initial click handler as a named function
+        function handleStartButtonClick() {
+            score = 0;
+            totalQuestions = 0;
+            updateScore();
+            startButton.textContent = "Speak Answer"; // Change button text
+            // Remove this initial listener
+            startButton.removeEventListener('click', handleStartButtonClick);
+            // Add the new listener for speaking
+            startButton.addEventListener('click', startListening);
+            generateProblem();
+        }
+
+        // Attach the initial named click handler
+        startButton.addEventListener('click', handleStartButtonClick);
+
+        // Initialize SpeechSynthesis
+        window.onload = () => {
+            synth = window.speechSynthesis;
+            if (!synth) {
+                showMessageBox("Speech Synthesis is not supported in this browser.");
+            }
+            setupSpeechRecognition();
+        };
+
+    </script>
+</body>
+</html>
