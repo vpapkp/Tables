@@ -72,6 +72,27 @@
             transform: translateY(0);
             box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
         }
+        .button-red {
+            background: linear-gradient(45deg, #ff416c, #ff4b2b); /* Red gradient for stop button */
+            color: white;
+            padding: 1rem 2.5rem;
+            border-radius: 9999px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+            border: none;
+            outline: none;
+        }
+        .button-red:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.3);
+        }
+        .button-red:active {
+            transform: translateY(0);
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+        }
         .score-text {
             font-size: 1.2rem;
             color: #666;
@@ -115,23 +136,64 @@
             -webkit-appearance: none;
             margin: 0;
         }
+        /* Custom select styling */
+        select {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%232575fc%22%20d%3D%22M287%20188.7L154.2%2056c-4.5-4.5-11.7-4.5-16.2%200L4.8%20188.7c-4.5%204.5-4.5%2011.7%200%2016.2l13.6%2013.6c4.5%204.5%2011.7%204.5%2016.2%200l109-109%20109%20109c4.5%204.5%2011.7%204.5%2016.2%200l13.6-13.6c4.5-4.5%204.5-11.7%200-16.2z%22%2F%3E%3C%2Fsvg%3E');
+            background-repeat: no-repeat;
+            background-position: right 0.7em top 50%, 0 0;
+            background-size: 0.65em auto, 100%;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1 class="text-4xl font-extrabold text-blue-800 mb-6">Multiplication Fun!</h1>
-        <p class="instructions">Click 'Start' to begin. Speak your answer when asked!</p>
-        <div id="problem" class="problem-text">Click Start!</div>
-        <button id="startButton" class="button-primary mt-4">Start</button>
+        <p id="instructions" class="instructions">Choose a mode to begin.</p>
+        
+        <!-- Mode Selection Buttons -->
+        <div id="modeSelection" class="flex flex-col sm:flex-row justify-center gap-4 mt-4">
+            <button id="learnButton" class="button-primary">Learn Tables</button>
+            <button id="testButton" class="button-primary">Test Yourself</button>
+        </div>
 
-        <!-- New elements for manual input -->
-        <div id="manualInputContainer" class="mt-4 hidden">
-            <input type="number" id="answerInput" class="w-full p-3 text-center text-2xl rounded-lg border-2 border-gray-300 focus:outline-none focus:border-blue-500" placeholder="Type your answer here">
-            <button id="submitAnswerButton" class="button-primary mt-4">Submit Answer</button>
+        <!-- Problem and Input Container -->
+        <div id="testModeContainer" class="hidden">
+            <div id="problem" class="problem-text"></div>
+            <button id="speakButton" class="button-primary mt-4">Speak Answer</button>
+
+            <!-- New elements for manual input -->
+            <div id="manualInputContainer" class="mt-4 hidden">
+                <input type="number" id="answerInput" class="w-full p-3 text-center text-2xl rounded-lg border-2 border-gray-300 focus:outline-none focus:border-blue-500" placeholder="Type your answer here">
+                <button id="submitAnswerButton" class="button-primary mt-4">Submit Answer</button>
+            </div>
+        </div>
+
+        <!-- Learn Mode Container -->
+        <div id="learnModeContainer" class="hidden">
+            <div id="learnText" class="problem-text"></div>
+            <div id="learnControls" class="flex flex-col sm:flex-row items-center justify-center gap-4 mt-4">
+                <select id="learnTableSelector" class="w-24 p-3 text-2xl text-center rounded-lg border-2 border-gray-300 focus:outline-none focus:border-blue-500">
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                    <option value="6">6</option>
+                    <option value="7">7</option>
+                    <option value="8">8</option>
+                    <option value="9">9</option>
+                    <option value="10">10</option>
+                </select>
+                <button id="startLearningButton" class="button-primary">Start Reciting</button>
+                <button id="stopLearningButton" class="button-red hidden">Stop</button>
+            </div>
         </div>
 
         <div id="feedback" class="feedback-text"></div>
-        <div id="score" class="score-text">Score: 0 / 0</div>
+        <div id="score" class="score-text"></div>
     </div>
 
     <!-- Custom Message Box -->
@@ -147,13 +209,24 @@
         const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
         // HTML elements
+        const modeSelection = document.getElementById('modeSelection');
+        const learnButton = document.getElementById('learnButton');
+        const testButton = document.getElementById('testButton');
+        const testModeContainer = document.getElementById('testModeContainer');
+        const learnModeContainer = document.getElementById('learnModeContainer');
+        const speakButton = document.getElementById('speakButton');
         const problemElement = document.getElementById('problem');
-        const startButton = document.getElementById('startButton');
         const feedbackElement = document.getElementById('feedback');
         const scoreElement = document.getElementById('score');
+        const instructionsElement = document.getElementById('instructions');
         const messageBox = document.getElementById('messageBox');
         const messageText = document.getElementById('messageText');
         const messageBoxClose = document.getElementById('messageBoxClose');
+        const learnTextElement = document.getElementById('learnText');
+        const stopLearningButton = document.getElementById('stopLearningButton');
+        const learnTableSelector = document.getElementById('learnTableSelector');
+        const startLearningButton = document.getElementById('startLearningButton');
+        const learnControls = document.getElementById('learnControls');
 
         // New HTML elements for manual input
         const manualInputContainer = document.getElementById('manualInputContainer');
@@ -167,6 +240,8 @@
         let isListening = false;
         let recognition;
         let synth;
+        let learningTimeout;
+        let isReciting = false;
 
         // --- Utility Functions for Message Box ---
         function showMessageBox(message) {
@@ -186,6 +261,10 @@
                 showMessageBox("Speech synthesis not supported in this browser.");
                 return;
             }
+            // Cancel any previous speech
+            if (isReciting) {
+                synth.cancel();
+            }
             const utterance = new SpeechSynthesisUtterance(text);
             utterance.lang = 'en-US'; // Set language
             utterance.rate = 0.9; // Slightly slower for kids
@@ -204,11 +283,9 @@
 
             if (!SpeechRecognition) {
                 // If SpeechRecognition is not supported, switch to manual input mode
-                showMessageBox("Voice input is not supported on this device. Please type your answers.");
-                startButton.disabled = true;
-                startButton.classList.add('opacity-50', 'cursor-not-allowed'); // Visually disable start button
+                showMessageBox("Voice input is not supported on this device. The app will switch to manual input.");
+                speakButton.classList.add('hidden');
                 manualInputContainer.classList.remove('hidden'); // Show manual input fields
-                document.querySelector('.instructions').textContent = "Type your answer and click Submit!";
                 return; // Exit, as voice recognition won't work
             }
 
@@ -244,9 +321,9 @@
             };
 
             recognition.onend = () => {
+                // If onend is called but we still expect to be listening, restart.
                 if (isListening) {
-                    // This block handles cases where recognition stops unexpectedly while we expect it to be active.
-                    // For this app's flow, onerror typically handles restarts, but this is a general safeguard.
+                     recognition.start();
                 }
             };
         }
@@ -262,7 +339,19 @@
             }
         }
 
-        // --- Game Logic ---
+        // --- Test Mode Logic ---
+        function startTestMode() {
+            modeSelection.classList.add('hidden');
+            learnModeContainer.classList.add('hidden');
+            testModeContainer.classList.remove('hidden');
+            instructionsElement.textContent = "Speak or type your answer to the problem!";
+
+            score = 0;
+            totalQuestions = 0;
+            updateScore();
+            generateProblem();
+        }
+
         function generateProblem() {
             num1 = Math.floor(Math.random() * 10) + 1; // Numbers 1-10
             num2 = Math.floor(Math.random() * 10) + 1; // Numbers 1-10
@@ -272,11 +361,11 @@
             feedbackElement.textContent = ""; // Clear previous feedback
             feedbackElement.classList.remove('correct', 'incorrect');
 
-            // If voice recognition is not supported (manual input is visible), clear input and focus
-            if (!manualInputContainer.classList.contains('hidden')) {
+            // If voice recognition is not supported, clear and focus input
+            if (manualInputContainer.classList.contains('hidden') === false) {
                 answerInput.value = ''; // Clear previous typed answer
                 answerInput.focus(); // Keep focus on the input field for quick typing
-                speak(`What is ${num1} times ${num2}?`); // Still speak the question
+                speak(`What is ${num1} times ${num2}?`);
             } else {
                 // Otherwise, proceed with speech input
                 speak(`What is ${num1} times ${num2}?`, () => {
@@ -288,11 +377,8 @@
         function checkAnswer(inputAnswer) {
             let parsedAnswer;
             if (typeof inputAnswer === 'string') {
-                // For voice input, try to parse the spoken words to numbers
-                // This is a simple regex; for more robust parsing of "twenty-five" etc., a library would be needed.
                 parsedAnswer = parseInt(inputAnswer.replace(/[^0-9]/g, ''), 10);
             } else {
-                // For typed input, it's already a number or can be parsed directly
                 parsedAnswer = parseInt(inputAnswer, 10);
             }
 
@@ -319,29 +405,70 @@
             scoreElement.textContent = `Score: ${score} / ${totalQuestions}`;
         }
 
-        // --- Event Listeners and Initialization ---
-        // Define the initial click handler as a named function
-        function handleStartButtonClick() {
-            score = 0;
-            totalQuestions = 0;
-            updateScore();
-            startButton.textContent = "Speak Answer"; // Change button text
-            // Remove this initial listener
-            startButton.removeEventListener('click', handleStartButtonClick);
-            // Add the new listener for speaking (if voice is supported)
-            // Or keep it for manual input if voice is not supported (it will do nothing if recognition is null)
-            startButton.addEventListener('click', startListening);
-            generateProblem();
-            // Hide manual input if voice is supported, otherwise it's already visible
-            if (recognition) { // Only hide if recognition was successfully set up
-                manualInputContainer.classList.add('hidden');
-            }
+        // --- Learn Mode Logic ---
+        function startLearningSelectedTable() {
+            isReciting = true;
+            stopLearningButton.classList.remove('hidden');
+            startLearningButton.classList.add('hidden');
+            learnTableSelector.disabled = true;
+
+            const table = parseInt(learnTableSelector.value, 10);
+            let multiplier = 1;
+
+            const reciteNext = () => {
+                if (multiplier > 10) {
+                    learnTextElement.textContent = "All done! Now you can try the test.";
+                    speak("All done! Now you can try the test.", () => {
+                        stopLearnMode();
+                    });
+                    return;
+                }
+
+                const result = table * multiplier;
+                learnTextElement.textContent = `${table} x ${multiplier} = ${result}`;
+                speak(`${table} times ${multiplier} is ${result}.`, () => {
+                    multiplier++;
+                    learningTimeout = setTimeout(reciteNext, 2000); // Pause between equations
+                });
+            };
+
+            reciteNext();
         }
 
-        // Attach the initial named click handler
-        startButton.addEventListener('click', handleStartButtonClick);
+        function showLearnModeControls() {
+            modeSelection.classList.add('hidden');
+            testModeContainer.classList.add('hidden');
+            learnModeContainer.classList.remove('hidden');
+            learnControls.classList.remove('hidden');
+            instructionsElement.textContent = "Select a table and click 'Start Reciting'!";
+            scoreElement.textContent = ""; // Clear score in learn mode
+            feedbackElement.textContent = "";
+            learnTextElement.textContent = "";
+        }
 
-        // Add event listener for the new manual submit button
+        function stopLearnMode() {
+            isReciting = false;
+            if (learningTimeout) {
+                clearTimeout(learningTimeout);
+            }
+            synth.cancel();
+            modeSelection.classList.remove('hidden');
+            testModeContainer.classList.add('hidden');
+            learnModeContainer.classList.add('hidden');
+            instructionsElement.textContent = "Choose a mode to begin.";
+            learnTextElement.textContent = "";
+            stopLearningButton.classList.add('hidden');
+            startLearningButton.classList.remove('hidden');
+            learnTableSelector.disabled = false;
+        }
+
+        // --- Event Listeners and Initialization ---
+        learnButton.addEventListener('click', showLearnModeControls);
+        testButton.addEventListener('click', startTestMode);
+        startLearningButton.addEventListener('click', startLearningSelectedTable);
+        stopLearningButton.addEventListener('click', stopLearnMode);
+
+        // Add event listener for the new manual submit button (for Test mode)
         submitAnswerButton.addEventListener('click', () => {
             const typedAnswer = answerInput.value;
             if (typedAnswer !== '') {
@@ -352,15 +479,20 @@
             }
         });
 
+        // Add event listener for the Speak Answer button (for Test mode)
+        speakButton.addEventListener('click', () => {
+            startListening();
+        });
+
+
         // Initialize SpeechSynthesis and SpeechRecognition on window load
         window.onload = () => {
             synth = window.speechSynthesis;
             if (!synth) {
                 showMessageBox("Speech Synthesis is not supported in this browser.");
             }
-            setupSpeechRecognition(); // This will determine if voice or manual input is used
+            setupSpeechRecognition(); // This will determine if voice or manual input is used for test mode
         };
-
     </script>
 </body>
 </html>
