@@ -159,7 +159,31 @@
             <button id="testButton" class="button-primary">Test Yourself</button>
         </div>
 
-        <!-- Problem and Input Container -->
+        <!-- Test Options Container -->
+        <div id="testModeOptions" class="hidden">
+            <h2 class="text-3xl font-bold text-gray-700 mb-4">Choose a Test</h2>
+            <div class="flex flex-col sm:flex-row justify-center gap-4">
+                <button id="testAllButton" class="button-primary">Test All Tables</button>
+                <div class="flex flex-row items-center gap-2">
+                    <select id="testTableSelector" class="w-24 p-3 text-2xl text-center rounded-lg border-2 border-gray-300 focus:outline-none focus:border-blue-500">
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                        <option value="6">6</option>
+                        <option value="7">7</option>
+                        <option value="8">8</option>
+                        <option value="9">9</option>
+                        <option value="10">10</option>
+                    </select>
+                    <button id="testSpecificButton" class="button-primary">Test Table</button>
+                </div>
+            </div>
+            <button id="backToMenuFromTestOptions" class="mt-4 text-blue-600 font-semibold underline">Back to Menu</button>
+        </div>
+
+        <!-- Test Mode Container (Quiz Screen) -->
         <div id="testModeContainer" class="hidden">
             <div id="problem" class="problem-text"></div>
             <button id="speakButton" class="button-primary mt-4">Speak Answer</button>
@@ -169,6 +193,7 @@
                 <input type="number" id="answerInput" class="w-full p-3 text-center text-2xl rounded-lg border-2 border-gray-300 focus:outline-none focus:border-blue-500" placeholder="Type your answer here">
                 <button id="submitAnswerButton" class="button-primary mt-4">Submit Answer</button>
             </div>
+            <button id="backToTestOptions" class="mt-4 text-blue-600 font-semibold underline">Back to Test Options</button>
         </div>
 
         <!-- Learn Mode Container -->
@@ -188,10 +213,14 @@
                     <option value="10">10</option>
                 </select>
                 <button id="startLearningButton" class="button-primary">Start Reciting</button>
-                <button id="stopLearningButton" class="button-red hidden">Stop</button>
             </div>
+            <div id="recitingControls" class="hidden flex flex-row items-center justify-center gap-4 mt-4">
+                 <button id="stopLearningButton" class="button-red">Stop Reciting</button>
+                 <button id="testThisTableButton" class="button-primary hidden">Test This Table</button>
+            </div>
+            <button id="backToMenuFromLearn" class="mt-4 text-blue-600 font-semibold underline">Back to Menu</button>
         </div>
-
+        
         <div id="feedback" class="feedback-text"></div>
         <div id="score" class="score-text"></div>
     </div>
@@ -212,6 +241,10 @@
         const modeSelection = document.getElementById('modeSelection');
         const learnButton = document.getElementById('learnButton');
         const testButton = document.getElementById('testButton');
+        const testModeOptions = document.getElementById('testModeOptions');
+        const testAllButton = document.getElementById('testAllButton');
+        const testSpecificButton = document.getElementById('testSpecificButton');
+        const testTableSelector = document.getElementById('testTableSelector');
         const testModeContainer = document.getElementById('testModeContainer');
         const learnModeContainer = document.getElementById('learnModeContainer');
         const speakButton = document.getElementById('speakButton');
@@ -223,10 +256,15 @@
         const messageText = document.getElementById('messageText');
         const messageBoxClose = document.getElementById('messageBoxClose');
         const learnTextElement = document.getElementById('learnText');
+        const learnControls = document.getElementById('learnControls');
+        const recitingControls = document.getElementById('recitingControls');
         const stopLearningButton = document.getElementById('stopLearningButton');
         const learnTableSelector = document.getElementById('learnTableSelector');
         const startLearningButton = document.getElementById('startLearningButton');
-        const learnControls = document.getElementById('learnControls');
+        const testThisTableButton = document.getElementById('testThisTableButton');
+        const backToMenuFromLearn = document.getElementById('backToMenuFromLearn');
+        const backToMenuFromTestOptions = document.getElementById('backToMenuFromTestOptions');
+        const backToTestOptions = document.getElementById('backToTestOptions');
 
         // New HTML elements for manual input
         const manualInputContainer = document.getElementById('manualInputContainer');
@@ -242,6 +280,7 @@
         let synth;
         let learningTimeout;
         let isReciting = false;
+        let testTableNumber = 0; // 0 for all tables, 1-10 for specific table
 
         // --- Utility Functions for Message Box ---
         function showMessageBox(message) {
@@ -255,13 +294,44 @@
 
         messageBoxClose.addEventListener('click', hideMessageBox);
 
+        // --- Screen Navigation ---
+        function showScreen(screen) {
+            modeSelection.classList.add('hidden');
+            testModeOptions.classList.add('hidden');
+            testModeContainer.classList.add('hidden');
+            learnModeContainer.classList.add('hidden');
+
+            if (screen === 'main') {
+                modeSelection.classList.remove('hidden');
+                instructionsElement.textContent = "Choose a mode to begin.";
+                scoreElement.textContent = "";
+                feedbackElement.textContent = "";
+                synth.cancel(); // Stop any speech
+            } else if (screen === 'testOptions') {
+                testModeOptions.classList.remove('hidden');
+                instructionsElement.textContent = "Choose a Test";
+                scoreElement.textContent = "";
+                feedbackElement.textContent = "";
+            } else if (screen === 'test') {
+                testModeContainer.classList.remove('hidden');
+                instructionsElement.textContent = "Speak or type your answer to the problem!";
+                scoreElement.textContent = "Score: 0 / 0";
+                feedbackElement.textContent = "";
+            } else if (screen === 'learn') {
+                learnModeContainer.classList.remove('hidden');
+                instructionsElement.textContent = "Select a table and click 'Start Reciting'!";
+                scoreElement.textContent = "";
+                feedbackElement.textContent = "";
+            }
+        }
+
         // --- Speech Synthesis (Text-to-Speech) ---
         function speak(text, callback) {
             if (!synth) {
                 showMessageBox("Speech synthesis not supported in this browser.");
                 return;
             }
-            // Cancel any previous speech
+            // Cancel any previous speech, but only if we're not in the middle of a continuous recitation
             if (isReciting) {
                 synth.cancel();
             }
@@ -340,11 +410,9 @@
         }
 
         // --- Test Mode Logic ---
-        function startTestMode() {
-            modeSelection.classList.add('hidden');
-            learnModeContainer.classList.add('hidden');
-            testModeContainer.classList.remove('hidden');
-            instructionsElement.textContent = "Speak or type your answer to the problem!";
+        function startTest(tableNumber) {
+            testTableNumber = tableNumber;
+            showScreen('test');
 
             score = 0;
             totalQuestions = 0;
@@ -353,10 +421,17 @@
         }
 
         function generateProblem() {
-            num1 = Math.floor(Math.random() * 10) + 1; // Numbers 1-10
-            num2 = Math.floor(Math.random() * 10) + 1; // Numbers 1-10
-            correctAnswer = num1 * num2;
+            if (testTableNumber > 0) {
+                // Test a specific table
+                num1 = testTableNumber;
+                num2 = Math.floor(Math.random() * 10) + 1;
+            } else {
+                // Test all tables
+                num1 = Math.floor(Math.random() * 10) + 1; // Numbers 1-10
+                num2 = Math.floor(Math.random() * 10) + 1; // Numbers 1-10
+            }
 
+            correctAnswer = num1 * num2;
             problemElement.textContent = `${num1} x ${num2} = ?`;
             feedbackElement.textContent = ""; // Clear previous feedback
             feedbackElement.classList.remove('correct', 'incorrect');
@@ -408,9 +483,9 @@
         // --- Learn Mode Logic ---
         function startLearningSelectedTable() {
             isReciting = true;
-            stopLearningButton.classList.remove('hidden');
-            startLearningButton.classList.add('hidden');
-            learnTableSelector.disabled = true;
+            learnControls.classList.add('hidden');
+            recitingControls.classList.remove('hidden');
+            testThisTableButton.classList.add('hidden'); // Hide test button until done
 
             const table = parseInt(learnTableSelector.value, 10);
             let multiplier = 1;
@@ -419,7 +494,8 @@
                 if (multiplier > 10) {
                     learnTextElement.textContent = "All done! Now you can try the test.";
                     speak("All done! Now you can try the test.", () => {
-                        stopLearnMode();
+                        isReciting = false;
+                        testThisTableButton.classList.remove('hidden'); // Show test button
                     });
                     return;
                 }
@@ -435,38 +511,36 @@
             reciteNext();
         }
 
-        function showLearnModeControls() {
-            modeSelection.classList.add('hidden');
-            testModeContainer.classList.add('hidden');
-            learnModeContainer.classList.remove('hidden');
-            learnControls.classList.remove('hidden');
-            instructionsElement.textContent = "Select a table and click 'Start Reciting'!";
-            scoreElement.textContent = ""; // Clear score in learn mode
-            feedbackElement.textContent = "";
-            learnTextElement.textContent = "";
-        }
-
         function stopLearnMode() {
             isReciting = false;
             if (learningTimeout) {
                 clearTimeout(learningTimeout);
             }
             synth.cancel();
-            modeSelection.classList.remove('hidden');
-            testModeContainer.classList.add('hidden');
-            learnModeContainer.classList.add('hidden');
-            instructionsElement.textContent = "Choose a mode to begin.";
-            learnTextElement.textContent = "";
-            stopLearningButton.classList.add('hidden');
-            startLearningButton.classList.remove('hidden');
+            showScreen('main');
+            learnControls.classList.remove('hidden');
+            recitingControls.classList.add('hidden');
             learnTableSelector.disabled = false;
+        }
+        
+        function testLearnedTable() {
+             const table = parseInt(learnTableSelector.value, 10);
+             startTest(table);
         }
 
         // --- Event Listeners and Initialization ---
-        learnButton.addEventListener('click', showLearnModeControls);
-        testButton.addEventListener('click', startTestMode);
+        learnButton.addEventListener('click', () => showScreen('learn'));
+        testButton.addEventListener('click', () => showScreen('testOptions'));
+        testAllButton.addEventListener('click', () => startTest(0)); // 0 for all tables
+        testSpecificButton.addEventListener('click', () => startTest(parseInt(testTableSelector.value, 10)));
         startLearningButton.addEventListener('click', startLearningSelectedTable);
         stopLearningButton.addEventListener('click', stopLearnMode);
+        testThisTableButton.addEventListener('click', testLearnedTable);
+        
+        backToMenuFromLearn.addEventListener('click', stopLearnMode);
+        backToMenuFromTestOptions.addEventListener('click', () => showScreen('main'));
+        backToTestOptions.addEventListener('click', () => showScreen('testOptions'));
+
 
         // Add event listener for the new manual submit button (for Test mode)
         submitAnswerButton.addEventListener('click', () => {
