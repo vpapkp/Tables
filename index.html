@@ -2,164 +2,112 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Multiplication Test Master</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Voice Math Master</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;800&display=swap');
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f8fafc;
-        }
-        .container {
+            font-family: 'Outfit', sans-serif;
+            background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
             min-height: 100vh;
             display: flex;
-            justify-content: center;
             align-items: center;
+            justify-content: center;
             padding: 1rem;
+            color: #1e293b;
         }
-        .card {
-            background-color: #ffffff;
-            border-radius: 1.5rem;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 2rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
             width: 100%;
-            max-width: 32rem;
-            padding: 2.5rem;
-            text-align: center;
+            max-width: 400px;
         }
-        .display-box {
-            background-color: #f1f5f9;
-            border-radius: 1rem;
-            padding: 1.5rem;
-            min-height: 7rem;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 3.5rem;
-            font-weight: 800;
-            color: #0f172a;
-            border: 2px solid #e2e8f0;
-            margin-bottom: 1rem;
+        .mic-pulse {
+            animation: pulse 1.5s infinite;
         }
-        .input-box {
-            font-size: 3.5rem;
-            font-weight: 800;
-            width: 100%;
-            text-align: center;
-            padding: 0.5rem;
-            border-radius: 1rem;
-            border: 3px solid #cbd5e1;
-            color: #4f46e5;
-            outline: none;
-            transition: border-color 0.2s;
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            70% { transform: scale(1.1); box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
         }
-        .input-box:focus {
-            border-color: #6366f1;
-        }
-        .input-box.correct {
-            border-color: #22c55e;
-            background-color: #f0fdf4;
-        }
-        .input-box.wrong {
-            border-color: #ef4444;
-            background-color: #fef2f2;
-        }
-        .btn {
-            font-weight: 700;
-            padding: 1rem 2rem;
-            border-radius: 0.75rem;
-            transition: all 0.2s;
-            cursor: pointer;
-            border: none;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .btn-primary {
-            background-color: #4f46e5;
-            color: white;
-        }
-        .btn-primary:hover:not(:disabled) {
-            background-color: #4338ca;
-        }
-        .scoreboard {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 0.5rem;
-            margin-bottom: 1.5rem;
-        }
-        .score-pill {
-            padding: 0.5rem;
-            border-radius: 0.5rem;
-            font-size: 0.75rem;
-            font-weight: 700;
-            text-transform: uppercase;
-        }
-        #timer-bar {
-            height: 6px;
-            background-color: #e2e8f0;
-            border-radius: 3px;
-            overflow: hidden;
-            margin-bottom: 1rem;
-        }
-        #timer-fill {
-            height: 100%;
-            background-color: #6366f1;
-            width: 100%;
+        .timer-transition {
             transition: width 0.1s linear;
+        }
+        /* Remove arrows from number input */
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="card">
-            <h1 class="text-3xl font-extrabold text-slate-900 mb-2">Math Master</h1>
-            <p class="text-slate-500 mb-6" id="header-subtitle">Multiplication Test Master</p>
 
-            <!-- Configuration Screen -->
-            <div id="config-screen">
-                <div class="space-y-6 text-left">
-                    <div>
-                        <label class="block text-sm font-bold text-slate-700 mb-2">Select Table Range</label>
-                        <div class="flex items-center space-x-3">
-                            <select id="start-table" class="bg-white border border-slate-300 rounded-lg p-2 flex-1"></select>
-                            <span class="text-slate-400 font-bold">to</span>
-                            <select id="end-table" class="bg-white border border-slate-300 rounded-lg p-2 flex-1"></select>
-                        </div>
-                    </div>
-                </div>
-                <button id="btn-start" class="btn btn-primary w-full mt-8 text-lg shadow-lg">Start Test</button>
-            </div>
-
-            <!-- Test Screen -->
-            <div id="test-screen" class="hidden">
-                <div class="scoreboard">
-                    <div class="score-pill bg-green-100 text-green-700">Correct: <span id="score-correct">0</span></div>
-                    <div class="score-pill bg-red-100 text-red-700">Wrong: <span id="score-wrong">0</span></div>
-                    <div class="score-pill bg-slate-100 text-slate-700">Left: <span id="score-left">0</span></div>
-                </div>
-
-                <div id="timer-bar">
-                    <div id="timer-fill"></div>
-                </div>
-
-                <div class="display-box" id="problem-text">...</div>
-                
-                <input type="number" id="answer-input" class="input-box mb-6" placeholder="?" autocomplete="off" inputmode="numeric">
-
-                <div class="flex space-x-3">
-                    <button id="btn-submit" class="btn btn-primary flex-1">Check Answer</button>
-                    <button id="btn-quit" class="btn bg-slate-200 text-slate-700 flex-1">Quit</button>
+    <div class="glass-card p-8 text-center">
+        <!-- SETUP SCREEN -->
+        <div id="setup-screen">
+            <h1 class="text-4xl font-800 text-indigo-900 mb-2">Math Master 🎙️</h1>
+            <p class="text-indigo-600 font-medium mb-8">Speak or type your answers!</p>
+            
+            <div class="space-y-4 text-left mb-8">
+                <label class="block text-xs font-bold text-indigo-400 uppercase tracking-widest">Select Table Range</label>
+                <div class="flex items-center space-x-3">
+                    <select id="start-table" class="w-full bg-indigo-50 border-2 border-indigo-100 rounded-xl p-3 font-bold text-indigo-900 focus:border-indigo-500 outline-none"></select>
+                    <span class="font-bold text-indigo-300">TO</span>
+                    <select id="end-table" class="w-full bg-indigo-50 border-2 border-indigo-100 rounded-xl p-3 font-bold text-indigo-900 focus:border-indigo-500 outline-none"></select>
                 </div>
             </div>
 
-            <!-- Results Screen -->
-            <div id="results-screen" class="hidden">
-                <h2 class="text-2xl font-bold text-slate-900 mb-4">Test Complete!</h2>
-                <div class="text-4xl font-extrabold text-indigo-600 mb-2" id="final-percentage">0%</div>
-                <p class="text-slate-500 mb-6" id="final-stats">You got 0 out of 0 right.</p>
-                <button id="btn-restart" class="btn btn-primary w-full">Try Again</button>
+            <button id="btn-start" class="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-bold text-xl shadow-xl transform active:scale-95 transition-all">
+                Start Voice Test
+            </button>
+        </div>
+
+        <!-- TEST SCREEN -->
+        <div id="test-screen" class="hidden">
+            <div class="flex justify-between items-center mb-6">
+                <div class="flex space-x-2">
+                    <div class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-bold">✓ <span id="score-correct">0</span></div>
+                    <div class="px-3 py-1 bg-red-100 text-red-700 rounded-full text-xs font-bold">✗ <span id="score-wrong">0</span></div>
+                </div>
+                <div class="text-xs font-bold text-indigo-400 uppercase">Left: <span id="score-left">0</span></div>
             </div>
+
+            <div class="w-full bg-indigo-100 h-2 rounded-full mb-8 overflow-hidden">
+                <div id="timer-fill" class="timer-transition h-full bg-indigo-600 w-full"></div>
+            </div>
+
+            <div class="text-6xl font-black text-slate-800 mb-8" id="problem-text">0 × 0</div>
+            
+            <div class="relative mb-6">
+                <input type="number" id="answer-input" class="w-full text-center text-4xl font-bold py-4 bg-slate-50 border-4 border-slate-200 rounded-3xl focus:border-indigo-500 outline-none" placeholder="?" inputmode="numeric">
+                <div id="mic-indicator" class="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center transition-all">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                    </svg>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <button id="btn-submit" class="py-4 bg-indigo-600 text-white rounded-2xl font-bold shadow-lg active:scale-95">Check</button>
+                <button id="btn-quit" class="py-4 bg-slate-200 text-slate-600 rounded-2xl font-bold active:scale-95">Quit</button>
+            </div>
+            
+            <p id="feedback-text" class="mt-4 text-sm font-bold text-indigo-500 italic h-6"></p>
+        </div>
+
+        <!-- RESULTS SCREEN -->
+        <div id="results-screen" class="hidden">
+            <div class="mb-8">
+                <div class="text-6xl mb-4">⭐</div>
+                <h2 class="text-3xl font-black text-indigo-900 mb-2">Test Complete!</h2>
+                <div class="text-5xl font-black text-indigo-600 mb-2" id="final-percent">0%</div>
+                <p class="text-indigo-400 font-bold" id="final-stats">Great effort!</p>
+            </div>
+            <button onclick="location.reload()" class="w-full py-4 bg-indigo-600 text-white rounded-2xl font-bold text-xl shadow-xl active:scale-95">Try Again</button>
         </div>
     </div>
 
@@ -170,50 +118,98 @@
             currentIndex: 0,
             correct: 0,
             wrong: 0,
-            timerLimit: 10000, // 10 seconds
-            timerRemaining: 10000,
+            timerLimit: 12000, 
+            timerRemaining: 12000,
             timerId: null,
-            apiKey: "" 
+            recognition: null,
+            isListening: false,
+            apiKey: ""
         };
 
-        const ui = {
-            screens: {
-                config: document.getElementById('config-screen'),
-                test: document.getElementById('test-screen'),
-                results: document.getElementById('results-screen')
-            },
+        const dom = {
+            setup: document.getElementById('setup-screen'),
+            test: document.getElementById('test-screen'),
+            results: document.getElementById('results-screen'),
             startTable: document.getElementById('start-table'),
             endTable: document.getElementById('end-table'),
             problem: document.getElementById('problem-text'),
             input: document.getElementById('answer-input'),
-            timerFill: document.getElementById('timer-fill'),
+            timer: document.getElementById('timer-fill'),
             scoreCorrect: document.getElementById('score-correct'),
             scoreWrong: document.getElementById('score-wrong'),
             scoreLeft: document.getElementById('score-left'),
+            finalPercent: document.getElementById('final-percent'),
             finalStats: document.getElementById('final-stats'),
-            finalPercent: document.getElementById('final-percentage')
+            mic: document.getElementById('mic-indicator'),
+            feedback: document.getElementById('feedback-text'),
+            btnStart: document.getElementById('btn-start'),
+            btnSubmit: document.getElementById('btn-submit'),
+            btnQuit: document.getElementById('btn-quit')
         };
 
         function init() {
+            // Populate select options
             for (let i = 1; i <= 20; i++) {
-                ui.startTable.add(new Option(i, i));
-                ui.endTable.add(new Option(i, i));
+                dom.startTable.add(new Option(i, i));
+                dom.endTable.add(new Option(i, i));
             }
-            ui.startTable.value = 1;
-            ui.endTable.value = 10;
+            dom.startTable.value = 1;
+            dom.endTable.value = 10;
 
-            document.getElementById('btn-start').addEventListener('click', startTest);
-            document.getElementById('btn-quit').addEventListener('click', () => location.reload());
-            document.getElementById('btn-restart').addEventListener('click', () => location.reload());
-            document.getElementById('btn-submit').addEventListener('click', checkAnswer);
-            
-            ui.input.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') checkAnswer();
-            });
+            dom.btnStart.addEventListener('click', startTest);
+            dom.btnSubmit.addEventListener('click', checkAnswer);
+            dom.btnQuit.addEventListener('click', () => location.reload());
+            dom.input.addEventListener('keypress', (e) => e.key === 'Enter' && checkAnswer());
+
+            // Set up Voice Recognition (Web Speech API)
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (SpeechRecognition) {
+                state.recognition = new SpeechRecognition();
+                state.recognition.lang = 'en-US';
+                state.recognition.interimResults = false;
+                
+                state.recognition.onstart = () => {
+                    state.isListening = true;
+                    dom.mic.classList.add('mic-pulse', 'bg-red-500');
+                    dom.mic.classList.remove('bg-slate-200');
+                };
+
+                state.recognition.onresult = (e) => {
+                    const result = e.results[0][0].transcript;
+                    const num = result.replace(/[^0-9]/g, '');
+                    dom.feedback.textContent = `I heard: ${result}`;
+                    if (num) {
+                        dom.input.value = num;
+                        // Short delay before auto-checking to let the child see the input
+                        setTimeout(() => { if(state.isRunning) checkAnswer(); }, 800);
+                    }
+                };
+                
+                state.recognition.onend = () => {
+                    state.isListening = false;
+                    dom.mic.classList.remove('mic-pulse', 'bg-red-500');
+                    dom.mic.classList.add('bg-slate-200');
+                };
+
+                state.recognition.onerror = () => {
+                    state.isListening = false;
+                    dom.mic.classList.remove('mic-pulse', 'bg-red-500');
+                    dom.mic.classList.add('bg-slate-200');
+                };
+            }
         }
 
         async function speak(text) {
-            const apiKey = state.apiKey;
+            // Hybrid approach for iPad: Use window.speechSynthesis for instant feedback
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.rate = 0.95;
+                utterance.pitch = 1.1; 
+                window.speechSynthesis.speak(utterance);
+            }
+
+            // Gemini TTS for high quality instructions/praise
             const payload = {
                 contents: [{ parts: [{ text }] }],
                 generationConfig: {
@@ -222,21 +218,22 @@
                 },
                 model: "gemini-2.5-flash-preview-tts"
             };
+            
             try {
-                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`, {
+                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${state.apiKey}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
                 const data = await res.json();
-                const audio64 = data.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
-                if (!audio64) return;
-                const audio = new Audio(URL.createObjectURL(createWavBlob(Uint8Array.from(atob(audio64), c => c.charCodeAt(0)).buffer, 24000)));
-                audio.play();
-            } catch (e) { console.error(e); }
+                const b64 = data.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
+                if (!b64) return;
+                const audio = new Audio(URL.createObjectURL(pcmToWav(Uint8Array.from(atob(b64), c => c.charCodeAt(0)).buffer, 24000)));
+                audio.play().catch(() => {}); 
+            } catch (e) { /* silent catch */ }
         }
 
-        function createWavBlob(pcm, rate) {
+        function pcmToWav(pcm, rate) {
             const h = new ArrayBuffer(44); const v = new DataView(h); const l = pcm.byteLength;
             const s = (o, str) => { for(let i=0; i<str.length; i++) v.setUint8(o+i, str.charCodeAt(i)); };
             s(0, 'RIFF'); v.setUint32(4, 36+l, true); s(8, 'WAVE'); s(12, 'fmt ');
@@ -247,15 +244,31 @@
             return new Blob([b], {type:'audio/wav'});
         }
 
-        function startTest() {
-            const s = parseInt(ui.startTable.value);
-            const e = parseInt(ui.endTable.value);
-            if (s > e) return alert("Start must be <= End");
+        function startListening() {
+            if (state.recognition && state.isRunning && !state.isListening) {
+                try {
+                    state.recognition.start();
+                } catch (e) { 
+                    console.warn("SpeechRecognition start error:", e);
+                }
+            }
+        }
 
+        function startTest() {
+            // Unlock audio context for mobile/iPad
+            const unlock = new Audio();
+            unlock.play().catch(() => {});
+            
+            const s = parseInt(dom.startTable.value);
+            const e = parseInt(dom.endTable.value);
+            if (s > e) return alert("Start table must be lower than or equal to end table!");
+
+            // Build problem list
             state.problems = [];
             for (let t = s; t <= e; t++) {
                 for (let m = 1; m <= 10; m++) state.problems.push({ t, m });
             }
+            // Shuffle problems for random test
             state.problems.sort(() => Math.random() - 0.5);
             
             state.correct = 0;
@@ -263,25 +276,30 @@
             state.currentIndex = 0;
             state.isRunning = true;
 
-            ui.screens.config.classList.add('hidden');
-            ui.screens.test.classList.remove('hidden');
+            dom.setup.classList.add('hidden');
+            dom.test.classList.remove('hidden');
             
             nextProblem();
         }
 
         async function nextProblem() {
-            if (state.currentIndex >= state.problems.length) return endTest();
+            if (state.currentIndex >= state.problems.length) return finish();
 
             const p = state.problems[state.currentIndex];
-            ui.problem.textContent = `${p.t} × ${p.m}`;
-            ui.input.value = "";
-            ui.input.className = "input-box mb-6";
-            ui.input.disabled = false;
-            ui.input.focus();
+            dom.problem.textContent = `${p.t} × ${p.m}`;
+            dom.input.value = "";
+            dom.input.disabled = false;
+            dom.feedback.textContent = "";
             
-            updateScoreboard();
+            setTimeout(() => dom.input.focus(), 100);
+
+            updateScores();
             startTimer();
+            
             await speak(`What is ${p.t} times ${p.m}?`);
+            
+            // Start listening for voice answer after the question
+            setTimeout(() => { if(state.isRunning) startListening(); }, 1500);
         }
 
         function startTimer() {
@@ -289,52 +307,48 @@
             state.timerRemaining = state.timerLimit;
             state.timerId = setInterval(() => {
                 state.timerRemaining -= 100;
-                const percent = (state.timerRemaining / state.timerLimit) * 100;
-                ui.timerFill.style.width = percent + "%";
-                
+                dom.timer.style.width = (state.timerRemaining / state.timerLimit) * 100 + "%";
                 if (state.timerRemaining <= 0) {
                     clearInterval(state.timerId);
-                    handleFail("Time's up!");
+                    handleWrong("Time's up!");
                 }
             }, 100);
         }
 
-        function updateScoreboard() {
-            ui.scoreCorrect.textContent = state.correct;
-            ui.scoreWrong.textContent = state.wrong;
-            ui.scoreLeft.textContent = state.problems.length - state.currentIndex;
-        }
-
         async function checkAnswer() {
-            if (ui.input.disabled) return;
+            if (dom.input.disabled || !state.isRunning) return;
             
             clearInterval(state.timerId);
+            if (state.recognition && state.isListening) {
+                try { state.recognition.stop(); } catch(e) {}
+            }
+            
             const p = state.problems[state.currentIndex];
-            const val = parseInt(ui.input.value);
-            const correctVal = p.t * p.m;
+            const userAnswer = parseInt(dom.input.value);
+            const correctAnswer = p.t * p.m;
+            dom.input.disabled = true;
 
-            ui.input.disabled = true;
-
-            if (val === correctVal) {
+            if (userAnswer === correctAnswer) {
                 state.correct++;
-                ui.input.classList.add('correct');
-                await speak("Correct!");
-                setTimeout(moveToNext, 1000);
+                await speak("Correct! Great job!");
+                setTimeout(moveToNext, 1200);
             } else {
-                handleFail("Not quite.");
+                handleWrong("Not quite.");
             }
         }
 
-        async function handleFail(msg) {
+        async function handleWrong(msg) {
             clearInterval(state.timerId);
+            if (state.recognition && state.isListening) {
+                try { state.recognition.stop(); } catch(e) {}
+            }
             state.wrong++;
             const p = state.problems[state.currentIndex];
-            ui.input.disabled = true;
-            ui.input.classList.add('wrong');
-            ui.input.value = p.t * p.m; // Show correct answer
+            dom.input.disabled = true;
+            dom.input.value = p.t * p.m; 
             
-            await speak(`${msg} ${p.t} times ${p.m} is ${p.t * p.m}`);
-            setTimeout(moveToNext, 2500);
+            await speak(`${msg}. ${p.t} times ${p.m} is ${p.t * p.m}`);
+            setTimeout(moveToNext, 3000);
         }
 
         function moveToNext() {
@@ -342,16 +356,22 @@
             nextProblem();
         }
 
-        function endTest() {
+        function updateScores() {
+            dom.scoreCorrect.textContent = state.correct;
+            dom.scoreWrong.textContent = state.wrong;
+            dom.scoreLeft.textContent = state.problems.length - state.currentIndex;
+        }
+
+        function finish() {
             state.isRunning = false;
-            ui.screens.test.classList.add('hidden');
-            ui.screens.results.classList.remove('hidden');
+            dom.test.classList.add('hidden');
+            dom.results.classList.remove('hidden');
             
             const total = state.problems.length;
-            const percent = Math.round((state.correct / total) * 100);
-            ui.finalPercent.textContent = percent + "%";
-            ui.finalStats.textContent = `You got ${state.correct} out of ${total} right!`;
-            speak(`Test complete. Your score is ${percent} percent.`);
+            const score = Math.round((state.correct / total) * 100);
+            dom.finalPercent.textContent = score + "%";
+            dom.finalStats.textContent = `You got ${state.correct} out of ${total} problems correct!`;
+            speak(`Test complete! You finished with a score of ${score} percent.`);
         }
 
         init();
