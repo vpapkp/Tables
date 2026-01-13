@@ -3,570 +3,358 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Multiplication Fun!</title>
-    <!-- Tailwind CSS CDN for easy styling -->
+    <title>Multiplication Test Master</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Custom styles for a playful look */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&display=swap');
         body {
-            font-family: 'Inter', sans-serif; /* Using Inter font */
-            background: linear-gradient(135deg, #a8c0ff, #3f2b96); /* Gradient background */
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+        .container {
+            min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            overflow: hidden; /* Prevent scrollbars */
+            padding: 1rem;
         }
-        .container {
-            background-color: rgba(255, 255, 255, 0.95); /* Slightly transparent white */
-            border-radius: 2rem; /* More rounded corners */
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3); /* Stronger shadow */
+        .card {
+            background-color: #ffffff;
+            border-radius: 1.5rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            width: 100%;
+            max-width: 32rem;
             padding: 2.5rem;
             text-align: center;
-            max-width: 90%;
-            width: 500px;
-            animation: fadeIn 1s ease-out; /* Fade-in animation */
         }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .problem-text {
-            font-size: 3.5rem; /* Larger font for problem */
-            font-weight: bold;
-            color: #4a00e0; /* Deep purple */
-            margin-bottom: 2rem;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
-        }
-        .feedback-text {
-            font-size: 1.8rem;
-            font-weight: 600;
-            margin-top: 1.5rem;
-            min-height: 3rem; /* Ensure space for feedback */
-        }
-        .correct {
-            color: #28a745; /* Green for correct */
-        }
-        .incorrect {
-            color: #dc3545; /* Red for incorrect */
-        }
-        .button-primary {
-            background: linear-gradient(45deg, #6a11cb, #2575fc); /* Blue-purple gradient */
-            color: white;
-            padding: 1rem 2.5rem;
-            border-radius: 9999px; /* Pill shape */
-            font-size: 1.5rem;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
-            border: none;
-            outline: none;
-        }
-        .button-primary:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.3);
-        }
-        .button-primary:active {
-            transform: translateY(0);
-            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
-        }
-        .button-red {
-            background: linear-gradient(45deg, #ff416c, #ff4b2b); /* Red gradient for stop button */
-            color: white;
-            padding: 1rem 2.5rem;
-            border-radius: 9999px;
-            font-size: 1.5rem;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
-            border: none;
-            outline: none;
-        }
-        .button-red:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.3);
-        }
-        .button-red:active {
-            transform: translateY(0);
-            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
-        }
-        .score-text {
-            font-size: 1.2rem;
-            color: #666;
-            margin-top: 1.5rem;
-        }
-        .instructions {
-            font-size: 1rem;
-            color: #555;
+        .display-box {
+            background-color: #f1f5f9;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            min-height: 7rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 3.5rem;
+            font-weight: 800;
+            color: #0f172a;
+            border: 2px solid #e2e8f0;
             margin-bottom: 1rem;
         }
-        .message-box {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            z-index: 1000;
+        .input-box {
+            font-size: 3.5rem;
+            font-weight: 800;
+            width: 100%;
             text-align: center;
-            display: none; /* Hidden by default */
+            padding: 0.5rem;
+            border-radius: 1rem;
+            border: 3px solid #cbd5e1;
+            color: #4f46e5;
+            outline: none;
+            transition: border-color 0.2s;
         }
-        .message-box button {
-            background-color: #2575fc;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
+        .input-box:focus {
+            border-color: #6366f1;
+        }
+        .input-box.correct {
+            border-color: #22c55e;
+            background-color: #f0fdf4;
+        }
+        .input-box.wrong {
+            border-color: #ef4444;
+            background-color: #fef2f2;
+        }
+        .btn {
+            font-weight: 700;
+            padding: 1rem 2rem;
+            border-radius: 0.75rem;
+            transition: all 0.2s;
             cursor: pointer;
-            margin-top: 15px;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
         }
-        /* Style for the input field */
-        #answerInput {
-            -webkit-appearance: none; /* Remove default styling for iOS */
-            -moz-appearance: textfield; /* Remove default styling for Firefox */
+        .btn-primary {
+            background-color: #4f46e5;
+            color: white;
         }
-        /* Hide arrows for number input */
-        input[type=number]::-webkit-inner-spin-button,
-        input[type=number]::-webkit-outer-spin-button {
-            -webkit-appearance: none;
-            margin: 0;
+        .btn-primary:hover:not(:disabled) {
+            background-color: #4338ca;
         }
-        /* Custom select styling */
-        select {
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            appearance: none;
-            background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%232575fc%22%20d%3D%22M287%20188.7L154.2%2056c-4.5-4.5-11.7-4.5-16.2%200L4.8%20188.7c-4.5%204.5-4.5%2011.7%200%2016.2l13.6%2013.6c4.5%204.5%2011.7%204.5%2016.2%200l109-109%20109%20109c4.5%204.5%2011.7%204.5%2016.2%200l13.6-13.6c4.5-4.5%204.5-11.7%200-16.2z%22%2F%3E%3C%2Fsvg%3E');
-            background-repeat: no-repeat;
-            background-position: right 0.7em top 50%, 0 0;
-            background-size: 0.65em auto, 100%;
+        .scoreboard {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .score-pill {
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        #timer-bar {
+            height: 6px;
+            background-color: #e2e8f0;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+        #timer-fill {
+            height: 100%;
+            background-color: #6366f1;
+            width: 100%;
+            transition: width 0.1s linear;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1 class="text-4xl font-extrabold text-blue-800 mb-6">Multiplication Fun!</h1>
-        <p id="instructions" class="instructions">Choose a mode to begin.</p>
-        
-        <!-- Mode Selection Buttons -->
-        <div id="modeSelection" class="flex flex-col sm:flex-row justify-center gap-4 mt-4">
-            <button id="learnButton" class="button-primary">Learn Tables</button>
-            <button id="testButton" class="button-primary">Test Yourself</button>
-        </div>
+        <div class="card">
+            <h1 class="text-3xl font-extrabold text-slate-900 mb-2">Math Master</h1>
+            <p class="text-slate-500 mb-6" id="header-subtitle">Multiplication Test Master</p>
 
-        <!-- Test Options Container -->
-        <div id="testModeOptions" class="hidden">
-            <h2 class="text-3xl font-bold text-gray-700 mb-4">Choose a Test</h2>
-            <div class="flex flex-col sm:flex-row justify-center gap-4">
-                <button id="testAllButton" class="button-primary">Test All Tables</button>
-                <div class="flex flex-row items-center gap-2">
-                    <select id="testTableSelector" class="w-24 p-3 text-2xl text-center rounded-lg border-2 border-gray-300 focus:outline-none focus:border-blue-500">
-                        <option value="1">1</option>
-                        <option value="2">2</option>
-                        <option value="3">3</option>
-                        <option value="4">4</option>
-                        <option value="5">5</option>
-                        <option value="6">6</option>
-                        <option value="7">7</option>
-                        <option value="8">8</option>
-                        <option value="9">9</option>
-                        <option value="10">10</option>
-                    </select>
-                    <button id="testSpecificButton" class="button-primary">Test Table</button>
+            <!-- Configuration Screen -->
+            <div id="config-screen">
+                <div class="space-y-6 text-left">
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 mb-2">Select Table Range</label>
+                        <div class="flex items-center space-x-3">
+                            <select id="start-table" class="bg-white border border-slate-300 rounded-lg p-2 flex-1"></select>
+                            <span class="text-slate-400 font-bold">to</span>
+                            <select id="end-table" class="bg-white border border-slate-300 rounded-lg p-2 flex-1"></select>
+                        </div>
+                    </div>
+                </div>
+                <button id="btn-start" class="btn btn-primary w-full mt-8 text-lg shadow-lg">Start Test</button>
+            </div>
+
+            <!-- Test Screen -->
+            <div id="test-screen" class="hidden">
+                <div class="scoreboard">
+                    <div class="score-pill bg-green-100 text-green-700">Correct: <span id="score-correct">0</span></div>
+                    <div class="score-pill bg-red-100 text-red-700">Wrong: <span id="score-wrong">0</span></div>
+                    <div class="score-pill bg-slate-100 text-slate-700">Left: <span id="score-left">0</span></div>
+                </div>
+
+                <div id="timer-bar">
+                    <div id="timer-fill"></div>
+                </div>
+
+                <div class="display-box" id="problem-text">...</div>
+                
+                <input type="number" id="answer-input" class="input-box mb-6" placeholder="?" autocomplete="off" inputmode="numeric">
+
+                <div class="flex space-x-3">
+                    <button id="btn-submit" class="btn btn-primary flex-1">Check Answer</button>
+                    <button id="btn-quit" class="btn bg-slate-200 text-slate-700 flex-1">Quit</button>
                 </div>
             </div>
-            <button id="backToMenuFromTestOptions" class="mt-4 text-blue-600 font-semibold underline">Back to Menu</button>
-        </div>
 
-        <!-- Test Mode Container (Quiz Screen) -->
-        <div id="testModeContainer" class="hidden">
-            <div id="problem" class="problem-text"></div>
-            <button id="speakButton" class="button-primary mt-4">Speak Answer</button>
-
-            <!-- New elements for manual input -->
-            <div id="manualInputContainer" class="mt-4 hidden">
-                <input type="number" id="answerInput" class="w-full p-3 text-center text-2xl rounded-lg border-2 border-gray-300 focus:outline-none focus:border-blue-500" placeholder="Type your answer here">
-                <button id="submitAnswerButton" class="button-primary mt-4">Submit Answer</button>
+            <!-- Results Screen -->
+            <div id="results-screen" class="hidden">
+                <h2 class="text-2xl font-bold text-slate-900 mb-4">Test Complete!</h2>
+                <div class="text-4xl font-extrabold text-indigo-600 mb-2" id="final-percentage">0%</div>
+                <p class="text-slate-500 mb-6" id="final-stats">You got 0 out of 0 right.</p>
+                <button id="btn-restart" class="btn btn-primary w-full">Try Again</button>
             </div>
-            <button id="backToTestOptions" class="mt-4 text-blue-600 font-semibold underline">Back to Test Options</button>
         </div>
-
-        <!-- Learn Mode Container -->
-        <div id="learnModeContainer" class="hidden">
-            <div id="learnText" class="problem-text"></div>
-            <div id="learnControls" class="flex flex-col sm:flex-row items-center justify-center gap-4 mt-4">
-                <select id="learnTableSelector" class="w-24 p-3 text-2xl text-center rounded-lg border-2 border-gray-300 focus:outline-none focus:border-blue-500">
-                    <option value="1">1</option>
-                    <option value="2">2</option>
-                    <option value="3">3</option>
-                    <option value="4">4</option>
-                    <option value="5">5</option>
-                    <option value="6">6</option>
-                    <option value="7">7</option>
-                    <option value="8">8</option>
-                    <option value="9">9</option>
-                    <option value="10">10</option>
-                </select>
-                <button id="startLearningButton" class="button-primary">Start Reciting</button>
-            </div>
-            <div id="recitingControls" class="hidden flex flex-row items-center justify-center gap-4 mt-4">
-                 <button id="stopLearningButton" class="button-red">Stop Reciting</button>
-                 <button id="testThisTableButton" class="button-primary hidden">Test This Table</button>
-            </div>
-            <button id="backToMenuFromLearn" class="mt-4 text-blue-600 font-semibold underline">Back to Menu</button>
-        </div>
-        
-        <div id="feedback" class="feedback-text"></div>
-        <div id="score" class="score-text"></div>
     </div>
 
-    <!-- Custom Message Box -->
-    <div id="messageBox" class="message-box">
-        <p id="messageText"></p>
-        <button id="messageBoxClose">OK</button>
-    </div>
-
-    <script>
-        // Global variables for Firebase configuration and app ID
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-
-        // HTML elements
-        const modeSelection = document.getElementById('modeSelection');
-        const learnButton = document.getElementById('learnButton');
-        const testButton = document.getElementById('testButton');
-        const testModeOptions = document.getElementById('testModeOptions');
-        const testAllButton = document.getElementById('testAllButton');
-        const testSpecificButton = document.getElementById('testSpecificButton');
-        const testTableSelector = document.getElementById('testTableSelector');
-        const testModeContainer = document.getElementById('testModeContainer');
-        const learnModeContainer = document.getElementById('learnModeContainer');
-        const speakButton = document.getElementById('speakButton');
-        const problemElement = document.getElementById('problem');
-        const feedbackElement = document.getElementById('feedback');
-        const scoreElement = document.getElementById('score');
-        const instructionsElement = document.getElementById('instructions');
-        const messageBox = document.getElementById('messageBox');
-        const messageText = document.getElementById('messageText');
-        const messageBoxClose = document.getElementById('messageBoxClose');
-        const learnTextElement = document.getElementById('learnText');
-        const learnControls = document.getElementById('learnControls');
-        const recitingControls = document.getElementById('recitingControls');
-        const stopLearningButton = document.getElementById('stopLearningButton');
-        const learnTableSelector = document.getElementById('learnTableSelector');
-        const startLearningButton = document.getElementById('startLearningButton');
-        const testThisTableButton = document.getElementById('testThisTableButton');
-        const backToMenuFromLearn = document.getElementById('backToMenuFromLearn');
-        const backToMenuFromTestOptions = document.getElementById('backToMenuFromTestOptions');
-        const backToTestOptions = document.getElementById('backToTestOptions');
-
-        // New HTML elements for manual input
-        const manualInputContainer = document.getElementById('manualInputContainer');
-        const answerInput = document.getElementById('answerInput');
-        const submitAnswerButton = document.getElementById('submitAnswerButton');
-
-        // Game state variables
-        let num1, num2, correctAnswer;
-        let score = 0;
-        let totalQuestions = 0;
-        let isListening = false;
-        let recognition;
-        let synth;
-        let learningTimeout;
-        let isReciting = false;
-        let testTableNumber = 0; // 0 for all tables, 1-10 for specific table
-
-        // --- Utility Functions for Message Box ---
-        function showMessageBox(message) {
-            messageText.textContent = message;
-            messageBox.style.display = 'block';
-        }
-
-        function hideMessageBox() {
-            messageBox.style.display = 'none';
-        }
-
-        messageBoxClose.addEventListener('click', hideMessageBox);
-
-        // --- Screen Navigation ---
-        function showScreen(screen) {
-            modeSelection.classList.add('hidden');
-            testModeOptions.classList.add('hidden');
-            testModeContainer.classList.add('hidden');
-            learnModeContainer.classList.add('hidden');
-
-            if (screen === 'main') {
-                modeSelection.classList.remove('hidden');
-                instructionsElement.textContent = "Choose a mode to begin.";
-                scoreElement.textContent = "";
-                feedbackElement.textContent = "";
-                synth.cancel(); // Stop any speech
-            } else if (screen === 'testOptions') {
-                testModeOptions.classList.remove('hidden');
-                instructionsElement.textContent = "Choose a Test";
-                scoreElement.textContent = "";
-                feedbackElement.textContent = "";
-            } else if (screen === 'test') {
-                testModeContainer.classList.remove('hidden');
-                instructionsElement.textContent = "Speak or type your answer to the problem!";
-                scoreElement.textContent = "Score: 0 / 0";
-                feedbackElement.textContent = "";
-            } else if (screen === 'learn') {
-                learnModeContainer.classList.remove('hidden');
-                instructionsElement.textContent = "Select a table and click 'Start Reciting'!";
-                scoreElement.textContent = "";
-                feedbackElement.textContent = "";
-            }
-        }
-
-        // --- Speech Synthesis (Text-to-Speech) ---
-        function speak(text, callback) {
-            if (!synth) {
-                showMessageBox("Speech synthesis not supported in this browser.");
-                return;
-            }
-            // Cancel any previous speech, but only if we're not in the middle of a continuous recitation
-            if (isReciting) {
-                synth.cancel();
-            }
-            const utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = 'en-US'; // Set language
-            utterance.rate = 0.9; // Slightly slower for kids
-            utterance.pitch = 1.0; // Normal pitch
-
-            if (callback) {
-                utterance.onend = callback;
-            }
-            synth.speak(utterance);
-        }
-
-        // --- Speech Recognition (Voice Input) ---
-        function setupSpeechRecognition() {
-            // Check for Web Speech API compatibility
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-
-            if (!SpeechRecognition) {
-                // If SpeechRecognition is not supported, switch to manual input mode
-                showMessageBox("Voice input is not supported on this device. The app will switch to manual input.");
-                speakButton.classList.add('hidden');
-                manualInputContainer.classList.remove('hidden'); // Show manual input fields
-                return; // Exit, as voice recognition won't work
-            }
-
-            recognition = new SpeechRecognition();
-            recognition.continuous = false; // Listen for a single utterance
-            recognition.lang = 'en-US';
-            recognition.interimResults = false; // Only return final results
-            recognition.maxAlternatives = 1; // Get the most likely result
-
-            recognition.onresult = (event) => {
-                isListening = false;
-                const spokenAnswer = event.results[0][0].transcript;
-                console.log('Spoken Answer:', spokenAnswer);
-                checkAnswer(spokenAnswer);
-            };
-
-            recognition.onerror = (event) => {
-                isListening = false;
-                console.error('Speech recognition error:', event.error);
-                if (event.error === 'no-speech') {
-                    feedbackElement.textContent = "I didn't hear anything. Try again!";
-                    speak("I didn't hear anything. Try again!", () => {
-                        setTimeout(startListening, 1000); // Try listening again
-                    });
-                } else if (event.error === 'not-allowed') {
-                    showMessageBox("Microphone access denied. Please allow microphone access in your browser settings to use voice input.");
-                } else {
-                    feedbackElement.textContent = `Error: ${event.error}. Please try again.`;
-                    speak(`Error: ${event.error}. Please try again.`, () => {
-                        setTimeout(startListening, 1000); // Try listening again
-                    });
-                }
-            };
-
-            recognition.onend = () => {
-                // If onend is called but we still expect to be listening, restart.
-                if (isListening) {
-                     recognition.start();
-                }
-            };
-        }
-
-        function startListening() {
-            if (recognition && !isListening) {
-                feedbackElement.textContent = "Listening...";
-                feedbackElement.classList.remove('correct', 'incorrect');
-                recognition.start();
-                isListening = true;
-            } else if (!recognition) {
-                showMessageBox("Speech recognition is not available.");
-            }
-        }
-
-        // --- Test Mode Logic ---
-        function startTest(tableNumber) {
-            testTableNumber = tableNumber;
-            showScreen('test');
-
-            score = 0;
-            totalQuestions = 0;
-            updateScore();
-            generateProblem();
-        }
-
-        function generateProblem() {
-            if (testTableNumber > 0) {
-                // Test a specific table
-                num1 = testTableNumber;
-                num2 = Math.floor(Math.random() * 10) + 1;
-            } else {
-                // Test all tables
-                num1 = Math.floor(Math.random() * 10) + 1; // Numbers 1-10
-                num2 = Math.floor(Math.random() * 10) + 1; // Numbers 1-10
-            }
-
-            correctAnswer = num1 * num2;
-            problemElement.textContent = `${num1} x ${num2} = ?`;
-            feedbackElement.textContent = ""; // Clear previous feedback
-            feedbackElement.classList.remove('correct', 'incorrect');
-
-            // If voice recognition is not supported, clear and focus input
-            if (manualInputContainer.classList.contains('hidden') === false) {
-                answerInput.value = ''; // Clear previous typed answer
-                answerInput.focus(); // Keep focus on the input field for quick typing
-                speak(`What is ${num1} times ${num2}?`);
-            } else {
-                // Otherwise, proceed with speech input
-                speak(`What is ${num1} times ${num2}?`, () => {
-                    startListening(); // Start listening after the question is spoken
-                });
-            }
-        }
-
-        function checkAnswer(inputAnswer) {
-            let parsedAnswer;
-            if (typeof inputAnswer === 'string') {
-                parsedAnswer = parseInt(inputAnswer.replace(/[^0-9]/g, ''), 10);
-            } else {
-                parsedAnswer = parseInt(inputAnswer, 10);
-            }
-
-            totalQuestions++;
-
-            if (!isNaN(parsedAnswer) && parsedAnswer === correctAnswer) {
-                score++;
-                feedbackElement.textContent = "Correct! Good job!";
-                feedbackElement.classList.add('correct');
-                speak("Correct! Good job!", () => {
-                    setTimeout(generateProblem, 1500); // Next problem after a short delay
-                });
-            } else {
-                feedbackElement.textContent = `Incorrect. The answer is ${correctAnswer}.`;
-                feedbackElement.classList.add('incorrect');
-                speak(`Incorrect. The answer is ${correctAnswer}.`, () => {
-                    setTimeout(generateProblem, 2500); // Next problem after a slightly longer delay
-                });
-            }
-            updateScore();
-        }
-
-        function updateScore() {
-            scoreElement.textContent = `Score: ${score} / ${totalQuestions}`;
-        }
-
-        // --- Learn Mode Logic ---
-        function startLearningSelectedTable() {
-            isReciting = true;
-            learnControls.classList.add('hidden');
-            recitingControls.classList.remove('hidden');
-            testThisTableButton.classList.add('hidden'); // Hide test button until done
-
-            const table = parseInt(learnTableSelector.value, 10);
-            let multiplier = 1;
-
-            const reciteNext = () => {
-                if (multiplier > 10) {
-                    learnTextElement.textContent = "All done! Now you can try the test.";
-                    speak("All done! Now you can try the test.", () => {
-                        isReciting = false;
-                        testThisTableButton.classList.remove('hidden'); // Show test button
-                    });
-                    return;
-                }
-
-                const result = table * multiplier;
-                learnTextElement.textContent = `${table} x ${multiplier} = ${result}`;
-                speak(`${table} times ${multiplier} is ${result}.`, () => {
-                    multiplier++;
-                    learningTimeout = setTimeout(reciteNext, 2000); // Pause between equations
-                });
-            };
-
-            reciteNext();
-        }
-
-        function stopLearnMode() {
-            isReciting = false;
-            if (learningTimeout) {
-                clearTimeout(learningTimeout);
-            }
-            synth.cancel();
-            showScreen('main');
-            learnControls.classList.remove('hidden');
-            recitingControls.classList.add('hidden');
-            learnTableSelector.disabled = false;
-        }
-        
-        function testLearnedTable() {
-             const table = parseInt(learnTableSelector.value, 10);
-             startTest(table);
-        }
-
-        // --- Event Listeners and Initialization ---
-        learnButton.addEventListener('click', () => showScreen('learn'));
-        testButton.addEventListener('click', () => showScreen('testOptions'));
-        testAllButton.addEventListener('click', () => startTest(0)); // 0 for all tables
-        testSpecificButton.addEventListener('click', () => startTest(parseInt(testTableSelector.value, 10)));
-        startLearningButton.addEventListener('click', startLearningSelectedTable);
-        stopLearningButton.addEventListener('click', stopLearnMode);
-        testThisTableButton.addEventListener('click', testLearnedTable);
-        
-        backToMenuFromLearn.addEventListener('click', stopLearnMode);
-        backToMenuFromTestOptions.addEventListener('click', () => showScreen('main'));
-        backToTestOptions.addEventListener('click', () => showScreen('testOptions'));
-
-
-        // Add event listener for the new manual submit button (for Test mode)
-        submitAnswerButton.addEventListener('click', () => {
-            const typedAnswer = answerInput.value;
-            if (typedAnswer !== '') {
-                checkAnswer(typedAnswer);
-            } else {
-                feedbackElement.textContent = "Please type an answer!";
-                feedbackElement.classList.remove('correct', 'incorrect');
-            }
-        });
-
-        // Add event listener for the Speak Answer button (for Test mode)
-        speakButton.addEventListener('click', () => {
-            startListening();
-        });
-
-
-        // Initialize SpeechSynthesis and SpeechRecognition on window load
-        window.onload = () => {
-            synth = window.speechSynthesis;
-            if (!synth) {
-                showMessageBox("Speech Synthesis is not supported in this browser.");
-            }
-            setupSpeechRecognition(); // This will determine if voice or manual input is used for test mode
+    <script type="module">
+        const state = {
+            isRunning: false,
+            problems: [],
+            currentIndex: 0,
+            correct: 0,
+            wrong: 0,
+            timerLimit: 10000, // 10 seconds
+            timerRemaining: 10000,
+            timerId: null,
+            apiKey: "" 
         };
+
+        const ui = {
+            screens: {
+                config: document.getElementById('config-screen'),
+                test: document.getElementById('test-screen'),
+                results: document.getElementById('results-screen')
+            },
+            startTable: document.getElementById('start-table'),
+            endTable: document.getElementById('end-table'),
+            problem: document.getElementById('problem-text'),
+            input: document.getElementById('answer-input'),
+            timerFill: document.getElementById('timer-fill'),
+            scoreCorrect: document.getElementById('score-correct'),
+            scoreWrong: document.getElementById('score-wrong'),
+            scoreLeft: document.getElementById('score-left'),
+            finalStats: document.getElementById('final-stats'),
+            finalPercent: document.getElementById('final-percentage')
+        };
+
+        function init() {
+            for (let i = 1; i <= 20; i++) {
+                ui.startTable.add(new Option(i, i));
+                ui.endTable.add(new Option(i, i));
+            }
+            ui.startTable.value = 1;
+            ui.endTable.value = 10;
+
+            document.getElementById('btn-start').addEventListener('click', startTest);
+            document.getElementById('btn-quit').addEventListener('click', () => location.reload());
+            document.getElementById('btn-restart').addEventListener('click', () => location.reload());
+            document.getElementById('btn-submit').addEventListener('click', checkAnswer);
+            
+            ui.input.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') checkAnswer();
+            });
+        }
+
+        async function speak(text) {
+            const apiKey = state.apiKey;
+            const payload = {
+                contents: [{ parts: [{ text }] }],
+                generationConfig: {
+                    responseModalities: ["AUDIO"],
+                    speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: "Leda" } } }
+                },
+                model: "gemini-2.5-flash-preview-tts"
+            };
+            try {
+                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                const audio64 = data.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
+                if (!audio64) return;
+                const audio = new Audio(URL.createObjectURL(createWavBlob(Uint8Array.from(atob(audio64), c => c.charCodeAt(0)).buffer, 24000)));
+                audio.play();
+            } catch (e) { console.error(e); }
+        }
+
+        function createWavBlob(pcm, rate) {
+            const h = new ArrayBuffer(44); const v = new DataView(h); const l = pcm.byteLength;
+            const s = (o, str) => { for(let i=0; i<str.length; i++) v.setUint8(o+i, str.charCodeAt(i)); };
+            s(0, 'RIFF'); v.setUint32(4, 36+l, true); s(8, 'WAVE'); s(12, 'fmt ');
+            v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
+            v.setUint32(24, rate, true); v.setUint32(28, rate*2, true); v.setUint16(32, 2, true);
+            v.setUint16(34, 16, true); s(36, 'data'); v.setUint32(40, l, true);
+            const b = new Uint8Array(44+l); b.set(new Uint8Array(h),0); b.set(new Uint8Array(pcm),44);
+            return new Blob([b], {type:'audio/wav'});
+        }
+
+        function startTest() {
+            const s = parseInt(ui.startTable.value);
+            const e = parseInt(ui.endTable.value);
+            if (s > e) return alert("Start must be <= End");
+
+            state.problems = [];
+            for (let t = s; t <= e; t++) {
+                for (let m = 1; m <= 10; m++) state.problems.push({ t, m });
+            }
+            state.problems.sort(() => Math.random() - 0.5);
+            
+            state.correct = 0;
+            state.wrong = 0;
+            state.currentIndex = 0;
+            state.isRunning = true;
+
+            ui.screens.config.classList.add('hidden');
+            ui.screens.test.classList.remove('hidden');
+            
+            nextProblem();
+        }
+
+        async function nextProblem() {
+            if (state.currentIndex >= state.problems.length) return endTest();
+
+            const p = state.problems[state.currentIndex];
+            ui.problem.textContent = `${p.t} × ${p.m}`;
+            ui.input.value = "";
+            ui.input.className = "input-box mb-6";
+            ui.input.disabled = false;
+            ui.input.focus();
+            
+            updateScoreboard();
+            startTimer();
+            await speak(`What is ${p.t} times ${p.m}?`);
+        }
+
+        function startTimer() {
+            clearInterval(state.timerId);
+            state.timerRemaining = state.timerLimit;
+            state.timerId = setInterval(() => {
+                state.timerRemaining -= 100;
+                const percent = (state.timerRemaining / state.timerLimit) * 100;
+                ui.timerFill.style.width = percent + "%";
+                
+                if (state.timerRemaining <= 0) {
+                    clearInterval(state.timerId);
+                    handleFail("Time's up!");
+                }
+            }, 100);
+        }
+
+        function updateScoreboard() {
+            ui.scoreCorrect.textContent = state.correct;
+            ui.scoreWrong.textContent = state.wrong;
+            ui.scoreLeft.textContent = state.problems.length - state.currentIndex;
+        }
+
+        async function checkAnswer() {
+            if (ui.input.disabled) return;
+            
+            clearInterval(state.timerId);
+            const p = state.problems[state.currentIndex];
+            const val = parseInt(ui.input.value);
+            const correctVal = p.t * p.m;
+
+            ui.input.disabled = true;
+
+            if (val === correctVal) {
+                state.correct++;
+                ui.input.classList.add('correct');
+                await speak("Correct!");
+                setTimeout(moveToNext, 1000);
+            } else {
+                handleFail("Not quite.");
+            }
+        }
+
+        async function handleFail(msg) {
+            clearInterval(state.timerId);
+            state.wrong++;
+            const p = state.problems[state.currentIndex];
+            ui.input.disabled = true;
+            ui.input.classList.add('wrong');
+            ui.input.value = p.t * p.m; // Show correct answer
+            
+            await speak(`${msg} ${p.t} times ${p.m} is ${p.t * p.m}`);
+            setTimeout(moveToNext, 2500);
+        }
+
+        function moveToNext() {
+            state.currentIndex++;
+            nextProblem();
+        }
+
+        function endTest() {
+            state.isRunning = false;
+            ui.screens.test.classList.add('hidden');
+            ui.screens.results.classList.remove('hidden');
+            
+            const total = state.problems.length;
+            const percent = Math.round((state.correct / total) * 100);
+            ui.finalPercent.textContent = percent + "%";
+            ui.finalStats.textContent = `You got ${state.correct} out of ${total} right!`;
+            speak(`Test complete. Your score is ${percent} percent.`);
+        }
+
+        init();
     </script>
 </body>
 </html>
